@@ -1,4 +1,5 @@
 defmodule ScramblerApi.Router do
+  require Logger
   use Plug.Router
 
   @dir Application.compile_env!(:scrambler_api, :working_dir)
@@ -13,6 +14,8 @@ defmodule ScramblerApi.Router do
   plug(:dispatch)
 
   get "/" do
+    Logger.debug("[200] GET #{URI.decode(conn.request_path)}index.html")
+
     conn
     |> put_resp_content_type("text/html")
     |> send_file(200, "#{@dir}/index.html")
@@ -23,12 +26,14 @@ defmodule ScramblerApi.Router do
       Scrambler.gen_scramble(type)
       |> Enum.join(" ")
 
+    Logger.debug("[200] GET #{URI.decode(conn.request_path)}: #{scramble}")
+
     conn
     |> put_resp_content_type("text/plain")
     |> send_resp(200, scramble)
   end
 
-  get "/i/:type/:scramble" do
+  get "/i/:type/:scramble" when type in ["2x2", "3x3", "4x4", "3x3x2"] do
     cube =
       scramble
       |> String.split()
@@ -55,12 +60,16 @@ defmodule ScramblerApi.Router do
       end)
       |> Jason.encode!()
 
+    Logger.debug("[200] GET #{URI.decode(conn.request_path)}:\n#{json}")
+
     conn
     |> put_resp_content_type("text/json")
     |> send_resp(200, json)
   end
 
   match _ do
+    Logger.debug("[404] GET #{URI.decode(conn.request_path)}")
+
     send_resp(conn, 404, "404")
   end
 end

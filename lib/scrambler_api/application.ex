@@ -1,22 +1,27 @@
 defmodule ScramblerApi.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
+  require Logger
   use Application
   @port Application.compile_env!(:scrambler_api, :port)
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Starts a worker by calling: ScramblerApi.Worker.start_link(arg)
-      # {ScramblerApi.Worker, arg}
-      {Plug.Cowboy, scheme: :http, plug: ScramblerApi.Router, options: [port: @port]}
-    ]
+    children =
+      [{_, [_, {:plug, plug}, _]}] = [
+        {Plug.Cowboy, scheme: :http, plug: ScramblerApi.Router, options: [port: @port]}
+      ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: ScramblerApi.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    case Supervisor.start_link(children, opts) do
+      {:ok, pid} ->
+        Logger.info("#{plug} started at port #{@port}.")
+        {:ok, pid}
+
+      {:error, e} ->
+        Logger.info("#{plug} failed to start: #{inspect(e)}.")
+        {:error, e}
+    end
   end
 end

@@ -1,2 +1,0 @@
-defmodule ScramblerApi do
-end
