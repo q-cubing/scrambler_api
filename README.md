@@ -25,3 +25,7 @@ mix run --no-halt
 ```
 
 Go to `localhost:your_port`.
+
+### The website
+
+Refer to [scramble-web](https://github.com/q-cubing/scrambler-web) readme.
