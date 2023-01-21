@@ -4,13 +4,14 @@ defmodule ScramblerApi.Application do
   @moduledoc false
 
   use Application
+  @port Application.compile_env!(:scrambler_api, :port)
 
   @impl true
   def start(_type, _args) do
     children = [
       # Starts a worker by calling: ScramblerApi.Worker.start_link(arg)
       # {ScramblerApi.Worker, arg}
-      {Plug.Cowboy, scheme: :http, plug: ScramblerApi.Router, options: [port: 8080]}
+      {Plug.Cowboy, scheme: :http, plug: ScramblerApi.Router, options: [port: @port]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
